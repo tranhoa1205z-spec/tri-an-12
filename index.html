@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thẻ Bài 3D Tương Tác</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      width: 100vw;
+      height: 100vh;
+      background-color: #0f172a;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, sans-serif;
+      perspective: 1000px;
+    }
+
+    /* Nút bật cảm biến cho điện thoại */
+    #btn-permission {
+      padding: 14px 28px;
+      font-size: 16px;
+      font-weight: bold;
+      background: linear-gradient(45deg, #00f2fe, #4facfe);
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+      z-index: 10;
+    }
+
+    .card-container {
+      width: 300px;
+      height: 450px;
+      transform-style: preserve-3d;
+      transition: transform 0.1s ease-out;
+    }
+
+    .card {
+      width: 100%;
+      height: 100%;
+      border-radius: 20px;
+      position: relative;
+      /* THAY LINK ẢNH CỦA BẠN VÀO GIỮA HAI DẤU NHÁY ĐƠN DƯỚI ĐÂY */
+      background-image: url('https://drive.google.com/drive/my-drive'); 
+      background-size: cover;
+      background-position: center;
+      box-shadow: 0 30px 50px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+      transform-style: preserve-3d;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        115deg,
+        rgba(255, 255, 255, 0) 30%,
+        rgba(255, 255, 255, 0.3) 45%,
+        rgba(255, 255, 255, 0.4) 50%,
+        rgba(255, 255, 255, 0.3) 55%,
+        rgba(255, 255, 255, 0) 70%
+      );
+      background-size: 200% 200%;
+      background-position: 0% 0%;
+      mix-blend-mode: overlay;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <button id="btn-permission">Bật hiệu ứng nghiêng 3D</button>
+
+  <div class="card-container" id="cardContainer">
+    <div class="card" id="card"></div>
+  </div>
+
+  <script>
+    const cardContainer = document.getElementById('cardContainer');
+    const btnPermission = document.getElementById('btn-permission');
+
+    function handleOrientation(event) {
+      let beta = event.beta;   
+      let gamma = event.gamma; 
+
+      let tiltX = Math.min(Math.max(beta - 45, -25), 25); 
+      let tiltY = Math.min(Math.max(gamma, -25), 25);
+
+      cardContainer.style.transform = `rotateX(${-tiltX}deg) rotateY(${tiltY}deg)`;
+    }
+
+    function requestGyroPermission() {
+      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission()
+          .then(permissionState => {
+            if (permissionState === 'granted') {
+              window.addEventListener('deviceorientation', handleOrientation);
+              btnPermission.style.display = 'none';
+            } else {
+              alert('Cần quyền cảm biến để chạy hiệu ứng 3D!');
+            }
+          })
+          .catch(console.error);
+      } else {
+        window.addEventListener('deviceorientation', handleOrientation);
+        btnPermission.style.display = 'none';
+      }
+    }
+
+    btnPermission.addEventListener('click', requestGyroPermission);
+  </script>
+</body>
+</html>
