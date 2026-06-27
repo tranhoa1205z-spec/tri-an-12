@@ -3,187 +3,81 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Thẻ Bài 3D Tách Lớp & Phản Quang</title>
+  <title>Thẻ Bài 3D Hoàn Chỉnh</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      width: 100vw;
-      height: 100vh;
-      background-color: #0b0f19;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      overflow: hidden;
-      font-family: system-ui, -apple-system, sans-serif;
-      perspective: 1200px;
+      width: 100vw; height: 100vh; background-color: #0b0f19;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      overflow: hidden; font-family: system-ui, sans-serif; perspective: 1200px;
     }
-
-    /* Nút bấm cảm biến */
     #btn-permission {
-      padding: 14px 28px;
-      font-size: 16px;
-      font-weight: bold;
-      background: linear-gradient(45deg, #00f2fe, #4facfe);
-      color: white;
-      border: none;
-      border-radius: 30px;
-      cursor: pointer;
-      margin-bottom: 30px;
-      box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
-      z-index: 10;
-      transition: transform 0.2s;
+      padding: 14px 28px; font-size: 16px; font-weight: bold;
+      background: linear-gradient(45deg, #00f2fe, #4facfe); color: white;
+      border: none; border-radius: 30px; cursor: pointer; margin-bottom: 30px;
+      box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4); z-index: 10;
     }
-    #btn-permission:active {
-      transform: scale(0.95);
-    }
-
-    /* Khung định hình tấm thẻ bài */
-    .card-container {
-      width: 300px;
-      height: 450px;
-      transform-style: preserve-3d;
-      transition: transform 0.1s ease-out;
-    }
-
-    /* LỚP 1: ẢNH NỀN (GIỮ NGUYÊN) */
+    .card-container { width: 300px; height: 450px; transform-style: preserve-3d; transition: transform 0.1s ease-out; }
     .card {
-      width: 100%;
-      height: 100%;
-      border-radius: 20px;
-      position: relative;
-      /* 🔴 CHÈN LINK ẢNH NỀN VÀO GIỮA HAI DẤU NHÁY ĐƠN DƯỚI ĐÂY */
-      background-image: url('https://i.pinimg.com/736x/07/1f/de/071fde04db97e63f2c6115a1ad717805.jpg'); 
-      background-size: cover;
-      background-position: center;
-      box-shadow: 0 30px 50px rgba(0, 0, 0, 0.6);
-      transform-style: preserve-3d;
-      overflow: hidden;
+      width: 100%; height: 100%; border-radius: 20px; position: relative;
+      background-image: url('https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=1000'); /* LINK ẢNH NỀN */
+      background-size: cover; background-position: center;
+      box-shadow: 0 30px 50px rgba(0, 0, 0, 0.6); transform-style: preserve-3d; overflow: hidden;
     }
-
-    /* LỚP 2: VẬT THỂ NỔI (.PNG) */
     .card-character {
-      position: absolute;
-      inset: 0;
-      /* 🔴 CHÈN LINK ẢNH VẬT THỂ TÁCH NỀN VÀO GIỮA HAI DẤU NHÁY ĐƠN DƯỚI ĐÂY */
-      background-image: url('https://i.pinimg.com/736x/19/33/12/193312d6f34d79be506a144567ba8fb9.jpg'); 
-      background-size: cover;
-      background-position: center;
-      pointer-events: none;
-      z-index: 2;
-      transform: translateZ(60px) scale(1.05); 
-      transition: transform 0.1s ease-out;
+      position: absolute; inset: 0;
+      background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000'); /* LINK VẬT THỂ NỔI */
+      background-size: cover; background-position: center; pointer-events: none; z-index: 2;
+      transform: translateZ(60px) scale(1.05); transition: transform 0.1s ease-out;
     }
-
-    /* LỚP 3: PHẢN QUANG CẦU VỒNG (COLOR DODGE) */
     .card-foil {
-      position: absolute;
-      inset: 0;
-      border-radius: 20px;
-      pointer-events: none;
-      z-index: 3;
-      background: linear-gradient(
-        var(--foil-angle, 115deg),
-        rgba(255, 0, 128, 0.15) 0%,
-        rgba(0, 242, 254, 0.2) 30%,
-        rgba(255, 255, 255, 0.6) 50%,
-        rgba(127, 0, 255, 0.2) 70%,
-        rgba(255, 0, 128, 0.15) 100%
-      );
-      background-size: 200% 200%;
-      background-position: var(--foil-x, 50%) var(--foil-y, 50%); 
-      mix-blend-mode: color-dodge; 
-      opacity: 0.8;
-      transition: background-position 0.1s ease-out;
+      position: absolute; inset: 0; border-radius: 20px; pointer-events: none; z-index: 3;
+      background: linear-gradient(var(--foil-angle, 115deg), rgba(255,0,128,0.15) 0%, rgba(0,242,254,0.2) 30%, rgba(255,255,255,0.6) 50%, rgba(127,0,255,0.2) 70%, rgba(255,0,128,0.15) 100%);
+      background-size: 200% 200%; background-position: var(--foil-x, 50%) var(--foil-y, 50%);
+      mix-blend-mode: color-dodge; opacity: 0.8; transition: background-position 0.1s ease-out;
     }
-
-    .card::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.08);
-      z-index: 1;
-    }
+    .card::after { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.08); z-index: 1; }
   </style>
 </head>
 <body>
-
   <button id="btn-permission">Bật hiệu ứng nghiêng 3D & Phản quang</button>
-
   <div class="card-container" id="cardContainer">
     <div class="card" id="card">
       <div class="card-character"></div>
       <div class="card-foil" id="cardFoil"></div>
     </div>
   </div>
-
   <script>
     const cardContainer = document.getElementById('cardContainer');
     const cardFoil = document.getElementById('cardFoil');
     const btnPermission = document.getElementById('btn-permission');
-
     function updateCardEffects(xDeg, yDeg) {
       cardContainer.style.transform = `rotateX(${xDeg}deg) rotateY(${yDeg}deg)`;
-      const foilX = 50 + (yDeg * 2.2);
-      const foilY = 50 - (xDeg * 2.2);
-      const foilAngle = 115 + (yDeg * 2);
-
-      cardFoil.style.setProperty('--foil-x', `${foilX}%`);
-      cardFoil.style.setProperty('--foil-y', `${foilY}%`);
-      cardFoil.style.setProperty('--foil-angle', `${foilAngle}deg`);
+      cardFoil.style.setProperty('--foil-x', `${50 + (yDeg * 2.2)}%`);
+      cardFoil.style.setProperty('--foil-y', `${50 - (xDeg * 2.2)}%`);
+      cardFoil.style.setProperty('--foil-angle', `${115 + (yDeg * 2)}deg`);
     }
-
-    // Trên PC
     document.addEventListener('mousemove', (e) => {
       if (window.innerWidth > 768) {
-        const xAxis = (window.innerWidth / 2 - e.pageX) / 12;
-        const yAxis = (window.innerHeight / 2 - e.pageY) / 12;
-        updateCardEffects(-yAxis, xAxis);
+        updateCardEffects(-(window.innerHeight / 2 - e.pageY) / 12, (window.innerWidth / 2 - e.pageX) / 12);
       }
     });
-
     document.addEventListener('mouseleave', () => {
       if (window.innerWidth > 768) {
         cardContainer.style.transform = `rotateY(0deg) rotateX(0deg)`;
-        cardFoil.style.setProperty('--foil-x', '50%');
-        cardFoil.style.setProperty('--foil-y', '50%');
-        cardFoil.style.setProperty('--foil-angle', '115deg');
+        cardFoil.style.setProperty('--foil-x', '50%'); cardFoil.style.setProperty('--foil-y', '50%'); cardFoil.style.setProperty('--foil-angle', '115deg');
       }
     });
-
-    // Trên Điện thoại
     function handleOrientation(event) {
-      let beta = event.beta;   
-      let gamma = event.gamma; 
-
-      let tiltX = Math.min(Math.max(beta - 45, -25), 25); 
-      let tiltY = Math.min(Math.max(gamma, -25), 25);
-
-      updateCardEffects(-tiltX, tiltY);
+      updateCardEffects(-Math.min(Math.max(event.beta - 45, -25), 25), Math.min(Math.max(event.gamma, -25), 25));
     }
-
     function requestGyroPermission() {
       if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-        DeviceOrientationEvent.requestPermission()
-          .then(permissionState => {
-            if (permissionState === 'granted') {
-              window.addEventListener('deviceorientation', handleOrientation);
-              btnPermission.style.display = 'none';
-            } else {
-              alert('Cần quyền cảm biến để chạy hiệu ứng!');
-            }
-          })
-          .catch(console.error);
-      } else {
-        window.addEventListener('deviceorientation', handleOrientation);
-        btnPermission.style.display = 'none';
-      }
+        DeviceOrientationEvent.requestPermission().then(state => {
+          if (state === 'granted') { window.addEventListener('deviceorientation', handleOrientation); btnPermission.style.display = 'none'; }
+        }).catch(console.error);
+      } else { window.addEventListener('deviceorientation', handleOrientation); btnPermission.style.display = 'none'; }
     }
-
     btnPermission.addEventListener('click', requestGyroPermission);
   </script>
 </body>
