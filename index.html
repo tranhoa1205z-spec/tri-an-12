@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Thẻ Bài 3D Lật Mặt & Phản Quang</title>
+  <title>Thẻ Bài 3D Tách Lớp & Lật Mặt</title>
   <style>
     /* ==========================================================================
        1. CẤU HÌNH GIAO DIỆN CHUNG
@@ -22,87 +22,102 @@
       box-shadow: 0 4px 15px rgba(255, 75, 43, 0.4); z-index: 10;
     }
 
-    /* KHUNG CHỨA TOÀN BỘ THẺ BÀI */
+    /* KHUNG XOAY CHÍNH CỦA THẺ BÀI */
     .card-container {
       width: 320px; height: 470px;
       cursor: pointer;
       transform-style: preserve-3d;
-      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); /* Hiệu ứng lật mượt mà */
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    /* Khi có class .flipped (khi click), thẻ sẽ lật 180 độ */
+    /* Khi kích hoạt click, toàn bộ thẻ lật 180 độ */
     .card-container.flipped {
       transform: rotateY(180deg) !important;
     }
 
-    /* CẤU HÌNH CHUNG CHO CẢ MẶT TRƯỚC VÀ MẶT SAU */
+    /* ĐỊNH DẠNG HAI MẶT TRƯỚC VÀ SAU */
     .card-front, .card-back {
       position: absolute; inset: 0;
       border-radius: 20px;
-      backface-visibility: hidden; /* Ẩn mặt đối diện khi lật ra sau */
+      backface-visibility: hidden; /* Giúp ẩn mặt này khi mặt kia lật ra */
       transform-style: preserve-3d;
       box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
 
     /* ==========================================================================
-       2. CHI TIẾT MẶT TRƯỚC CỦA THẺ (FRONT)
+       2. CHI TIẾT MẶT TRƯỚC (FRONT) - TÁCH BIỆT NỀN VÀ VẬT THỂ
        ========================================================================== */
     .card-front {
-      /* 🔴 THAY TÊN FILE HOẶC LINK ẢNH NỀN VÀO ĐÂY */
+      /* 🔴 1. ĐƯỜNG LINK ẢNH NỀN CỦA BẠN (GIỮ NGUYÊN) */
       background-image: url('nen.jpg'); 
       background-size: cover; background-position: center;
+      overflow: hidden;
     }
 
-    /* Lớp nhân vật nổi lên */
+    /* 🔴 2. LỚP VẬT THỂ / NHÂN VẬT NỔI (.PNG TRONG SUỐT) */
     .card-character {
       position: absolute; inset: 0;
-      /* 🔴 THAY TÊN FILE HOẶC LINK ẢNH NHÂN VẬT TÁCH NỀN (.PNG) VÀO ĐÂY */
+      /* 🔴 ĐƯỜNG LINK ẢNH NHÂN VẬT ĐÃ TÁCH NỀN CỦA BẠN */
       background-image: url('nhanvat.png'); 
       background-size: cover; background-position: center; pointer-events: none; z-index: 2;
-      transform: translateZ(55px) scale(1.03); /* Đẩy nổi nhân vật */
+      
+      /* Đẩy nổi vật thể lên hẳn 60px trong không gian 3D và phóng to nhẹ tránh lộ viền */
+      transform: translateZ(60px) scale(1.05); 
+      transition: transform 0.1s ease-out;
     }
 
-    /* Hiệu ứng dải phản quang cầu vồng */
+    /* 🔴 3. LỚP PHỦ PHẢN QUANG CẦU VỒNG (HOLOGRAM) */
     .card-foil {
       position: absolute; inset: 0; border-radius: 20px; pointer-events: none; z-index: 3;
-      background: linear-gradient(var(--foil-angle, 115deg), rgba(255,0,128,0.15) 0%, rgba(0,242,254,0.2) 30%, rgba(255,255,255,0.65) 50%, rgba(127,0,255,0.2) 70%, rgba(255,0,128,0.15) 100%);
-      background-size: 200% 200%; background-position: var(--foil-x, 50%) var(--foil-y, 50%);
-      mix-blend-mode: color-dodge; opacity: 0.8;
+      background: linear-gradient(
+        var(--foil-angle, 115deg), 
+        rgba(255,0,128,0.15) 0%, 
+        rgba(0,242,254,0.2) 30%, 
+        rgba(255,255,255,0.65) 50%, 
+        rgba(127,0,255,0.2) 70%, 
+        rgba(255,0,128,0.15) 100%
+      );
+      background-size: 200% 200%; 
+      background-position: var(--foil-x, 50%) var(--foil-y, 50%);
+      mix-blend-mode: color-dodge; 
+      opacity: 0.8;
+      transition: background-position 0.1s ease-out;
     }
 
+    /* Lớp lót tối nhẹ phía trên ảnh nền để tăng tương phản bắt sáng của lớp phản quang */
     .card-front::after {
-      content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.05); z-index: 1; border-radius: 20px;
+      content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.05); z-index: 1;
     }
 
     /* ==========================================================================
-       3. CHI TIẾT MẶT SAU CỦA THẺ (BACK) - GRADIENT ĐỎ ĐEN
+       3. CHI TIẾT MẶT SAU (BACK) - GRADIENT ĐỎ ĐEN & VĂN BẢN
        ========================================================================== */
     .card-back {
-      /* Màu nền Gradient Đỏ - Đen huyền bí */
-      background: linear-gradient(135deg, #1f0303 0%, #0d0101 40%, #000000 100%);
-      transform: rotateY(180deg); /* Đảo ngược mặt sau sẵn từ đầu */
+      /* Hiệu ứng màu Gradient Đỏ - Đen quyền lực */
+      background: linear-gradient(135deg, #260202 0%, #0d0101 50%, #000000 100%);
+      transform: rotateY(180deg); /* Mặc định mặt sau sẽ úp lại */
       display: flex; flex-direction: column; justify-content: center; align-items: center;
       padding: 30px; text-align: center; color: #f3f4f6;
-      border: 2px solid #5a0505; /* Viền đỏ sẫm sang trọng */
+      border: 2px solid #630404; /* Viền đỏ sẫm sang trọng */
     }
 
-    /* Hiệu ứng trang trí lập lòe cho mặt sau */
+    /* Đèn giả lập tỏa sáng nhẹ từ tâm mặt sau */
     .card-back::before {
       content: ""; position: absolute; inset: 0; border-radius: 18px;
       background: radial-gradient(circle at center, rgba(255, 0, 0, 0.15) 0%, transparent 70%);
       pointer-events: none;
     }
 
-    /* Khung chứa văn bản ở mặt sau */
+    /* Phần văn bản đẩy khối 3D nổi hẳn lên khi lật ra */
     .card-content {
       z-index: 2;
-      transform: translateZ(40px); /* Đẩy chữ nổi lên không gian 3D */
+      transform: translateZ(50px); 
     }
 
     .card-content h2 {
       font-size: 24px; color: #ff4b2b; margin-bottom: 15px; font-weight: 800;
-      text-shadow: 0 2px 10px rgba(255, 75, 43, 0.3); letter-spacing: 1px;
+      text-shadow: 0 2px 10px rgba(255, 75, 43, 0.4); letter-spacing: 1px;
     }
 
     .card-content p {
@@ -123,8 +138,8 @@
 
     <div class="card-back">
       <div class="card-content">
-        <h2>LỜI TRI ÂN</h2>
-        <p>Cảm ơn thầy cô vì những hành trình tri thức đầy ý nghĩa, những bài học không chỉ nằm trên trang sách mà còn là hành trang quý giá bước vào đời.</p>
+        <h2>TIÊU ĐỀ MẶT SAU</h2>
+        <p>Đây là nội dung văn bản nằm ở mặt sau của tấm thẻ bài 3D tách lớp. Khi bạn nhấn vào mặt trước, tấm thẻ sẽ xoay lật mượt mà để hiển thị thông điệp này.</p>
       </div>
     </div>
 
@@ -132,7 +147,7 @@
 
   <script>
     /* ==========================================================================
-       4. ĐIỀU KHIỂN LOGIC XOAY 3D, PHẢN QUANG VÀ LẬT THẺ
+       4. ĐIỀU KHIỂN LOGIC XOAY 3D, DI CHUYỂN ÁNH SÁNG VÀ LẬT THẺ
        ========================================================================== */
     const cardContainer = document.getElementById('cardContainer');
     const cardFoil = document.getElementById('cardFoil');
@@ -140,12 +155,14 @@
     
     let isFlipped = false;
 
-    // Hàm cập nhật góc nghiêng và vệt sáng phản quang (chỉ chạy khi CHƯA lật)
+    // Hàm tính toán góc nghiêng đồng thời cho cả khung thẻ và dải phản quang
     function updateCardEffects(xDeg, yDeg) {
-      if (isFlipped) return; // Nếu đã lật mặt sau thì không tính toán hiệu ứng mặt trước nữa
+      if (isFlipped) return; // Nếu đang lật mặt sau văn bản thì dừng hiệu ứng mặt trước
 
+      // Xoay khung thẻ bài ngoài không gian 3D
       cardContainer.style.transform = `rotateX(${xDeg}deg) rotateY(${yDeg}deg)`;
       
+      // Di chuyển vệt sáng phản quang ngược hướng nghiêng để tạo cảm giác thực tế
       const foilX = 50 + (yDeg * 2.5);
       const foilY = 50 - (xDeg * 2.5);
       const foilAngle = 115 + (yDeg * 2);
@@ -155,14 +172,14 @@
       cardFoil.style.setProperty('--foil-angle', `${foilAngle}deg`);
     }
 
-    // --- SỰ KIỆN CLICK ĐỂ LẬT THẺ ---
+    // --- SỰ KIỆN CLICK LẬT MẶT THẺ ---
     cardContainer.addEventListener('click', () => {
       isFlipped = !isFlipped;
       if (isFlipped) {
         cardContainer.classList.add('flipped');
       } else {
         cardContainer.classList.remove('flipped');
-        cardContainer.style.transform = `rotateX(0deg) rotateY(0deg)`; // Trả về vị trí thẳng khi lật lại mặt trước
+        cardContainer.style.transform = `rotateX(0deg) rotateY(0deg)`; // Reset về vị trí phẳng khi lật lại mặt trước
       }
     });
 
@@ -175,6 +192,7 @@
       }
     });
 
+    // Trả thẻ về trạng thái phẳng lặng khi di chuột ra ngoài
     document.addEventListener('mouseleave', () => {
       if (window.innerWidth > 768 && !isFlipped) {
         cardContainer.style.transform = `rotateY(0deg) rotateX(0deg)`;
@@ -183,7 +201,7 @@
       }
     });
 
-    // --- NGHIÊNG MÁY TRÊN ĐIỆN THOẠI (MOBILE) ---
+    // --- NGHIÊNG ĐIỆN THOẠI (MOBILE) ---
     function handleOrientation(event) {
       if (isFlipped) return;
       let beta = event.beta;   
@@ -195,6 +213,7 @@
       updateCardEffects(-tiltX, tiltY);
     }
 
+    // Xin quyền cảm biến phần cứng
     function requestGyroPermission() {
       if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
         DeviceOrientationEvent.requestPermission().then(state => {
