@@ -3,80 +3,210 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Thẻ Bài 3D Hoàn Chỉnh</title>
+  <title>Thẻ Bài 3D Lật Mặt & Phản Quang</title>
   <style>
+    /* ==========================================================================
+       1. CẤU HÌNH GIAO DIỆN CHUNG
+       ========================================================================== */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      width: 100vw; height: 100vh; background-color: #0b0f19;
+      width: 100vw; height: 100vh; background-color: #05070f;
       display: flex; flex-direction: column; justify-content: center; align-items: center;
-      overflow: hidden; font-family: system-ui, sans-serif; perspective: 1200px;
+      overflow: hidden; font-family: system-ui, -apple-system, sans-serif; perspective: 1500px;
     }
+
     #btn-permission {
-      padding: 14px 28px; font-size: 16px; font-weight: bold;
-      background: linear-gradient(45deg, #00f2fe, #4facfe); color: white;
-      border: none; border-radius: 30px; cursor: pointer; margin-bottom: 30px;
-      box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4); z-index: 10;
+      padding: 13px 25px; font-size: 15px; font-weight: bold;
+      background: linear-gradient(45deg, #ff416c, #ff4b2b); color: white;
+      border: none; border-radius: 30px; cursor: pointer; margin-bottom: 25px;
+      box-shadow: 0 4px 15px rgba(255, 75, 43, 0.4); z-index: 10;
     }
-    .card-container { width: 300px; height: 450px; transform-style: preserve-3d; transition: transform 0.1s ease-out; }
-    .card {
-      width: 100%; height: 100%; border-radius: 20px; position: relative;
-      background-image: url('https://i.pinimg.com/736x/07/1f/de/071fde04db97e63f2c6115a1ad717805.jpg'); /* LINK ẢNH NỀN */
+
+    /* KHUNG CHỨA TOÀN BỘ THẺ BÀI */
+    .card-container {
+      width: 320px; height: 470px;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); /* Hiệu ứng lật mượt mà */
+    }
+
+    /* Khi có class .flipped (khi click), thẻ sẽ lật 180 độ */
+    .card-container.flipped {
+      transform: rotateY(180deg) !important;
+    }
+
+    /* CẤU HÌNH CHUNG CHO CẢ MẶT TRƯỚC VÀ MẶT SAU */
+    .card-front, .card-back {
+      position: absolute; inset: 0;
+      border-radius: 20px;
+      backface-visibility: hidden; /* Ẩn mặt đối diện khi lật ra sau */
+      transform-style: preserve-3d;
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* ==========================================================================
+       2. CHI TIẾT MẶT TRƯỚC CỦA THẺ (FRONT)
+       ========================================================================== */
+    .card-front {
+      /* 🔴 THAY TÊN FILE HOẶC LINK ẢNH NỀN VÀO ĐÂY */
+      background-image: url('nen.jpg'); 
       background-size: cover; background-position: center;
-      box-shadow: 0 30px 50px rgba(0, 0, 0, 0.6); transform-style: preserve-3d; overflow: hidden;
     }
+
+    /* Lớp nhân vật nổi lên */
     .card-character {
       position: absolute; inset: 0;
-      background-image: url('https://i.pinimg.com/736x/19/33/12/193312d6f34d79be506a144567ba8fb9.jpg'); /* LINK VẬT THỂ NỔI */
+      /* 🔴 THAY TÊN FILE HOẶC LINK ẢNH NHÂN VẬT TÁCH NỀN (.PNG) VÀO ĐÂY */
+      background-image: url('nhanvat.png'); 
       background-size: cover; background-position: center; pointer-events: none; z-index: 2;
-      transform: translateZ(60px) scale(1.05); transition: transform 0.1s ease-out;
+      transform: translateZ(55px) scale(1.03); /* Đẩy nổi nhân vật */
     }
+
+    /* Hiệu ứng dải phản quang cầu vồng */
     .card-foil {
       position: absolute; inset: 0; border-radius: 20px; pointer-events: none; z-index: 3;
-      background: linear-gradient(var(--foil-angle, 115deg), rgba(255,0,128,0.15) 0%, rgba(0,242,254,0.2) 30%, rgba(255,255,255,0.6) 50%, rgba(127,0,255,0.2) 70%, rgba(255,0,128,0.15) 100%);
+      background: linear-gradient(var(--foil-angle, 115deg), rgba(255,0,128,0.15) 0%, rgba(0,242,254,0.2) 30%, rgba(255,255,255,0.65) 50%, rgba(127,0,255,0.2) 70%, rgba(255,0,128,0.15) 100%);
       background-size: 200% 200%; background-position: var(--foil-x, 50%) var(--foil-y, 50%);
-      mix-blend-mode: color-dodge; opacity: 0.8; transition: background-position 0.1s ease-out;
+      mix-blend-mode: color-dodge; opacity: 0.8;
     }
-    .card::after { content: ""; position: absolute; inset: 0; background: rgba(0,0,0,0.08); z-index: 1; }
+
+    .card-front::after {
+      content: ""; position: absolute; inset: 0; background: rgba(0, 0, 0, 0.05); z-index: 1; border-radius: 20px;
+    }
+
+    /* ==========================================================================
+       3. CHI TIẾT MẶT SAU CỦA THẺ (BACK) - GRADIENT ĐỎ ĐEN
+       ========================================================================== */
+    .card-back {
+      /* Màu nền Gradient Đỏ - Đen huyền bí */
+      background: linear-gradient(135deg, #1f0303 0%, #0d0101 40%, #000000 100%);
+      transform: rotateY(180deg); /* Đảo ngược mặt sau sẵn từ đầu */
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      padding: 30px; text-align: center; color: #f3f4f6;
+      border: 2px solid #5a0505; /* Viền đỏ sẫm sang trọng */
+    }
+
+    /* Hiệu ứng trang trí lập lòe cho mặt sau */
+    .card-back::before {
+      content: ""; position: absolute; inset: 0; border-radius: 18px;
+      background: radial-gradient(circle at center, rgba(255, 0, 0, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Khung chứa văn bản ở mặt sau */
+    .card-content {
+      z-index: 2;
+      transform: translateZ(40px); /* Đẩy chữ nổi lên không gian 3D */
+    }
+
+    .card-content h2 {
+      font-size: 24px; color: #ff4b2b; margin-bottom: 15px; font-weight: 800;
+      text-shadow: 0 2px 10px rgba(255, 75, 43, 0.3); letter-spacing: 1px;
+    }
+
+    .card-content p {
+      font-size: 15px; line-height: 1.6; color: #cbd5e1; font-weight: 400;
+    }
   </style>
 </head>
 <body>
+
   <button id="btn-permission">Bật hiệu ứng nghiêng 3D & Phản quang</button>
+
   <div class="card-container" id="cardContainer">
-    <div class="card" id="card">
+    
+    <div class="card-front">
       <div class="card-character"></div>
       <div class="card-foil" id="cardFoil"></div>
     </div>
+
+    <div class="card-back">
+      <div class="card-content">
+        <h2>LỜI TRI ÂN</h2>
+        <p>Cảm ơn thầy cô vì những hành trình tri thức đầy ý nghĩa, những bài học không chỉ nằm trên trang sách mà còn là hành trang quý giá bước vào đời.</p>
+      </div>
+    </div>
+
   </div>
+
   <script>
+    /* ==========================================================================
+       4. ĐIỀU KHIỂN LOGIC XOAY 3D, PHẢN QUANG VÀ LẬT THẺ
+       ========================================================================== */
     const cardContainer = document.getElementById('cardContainer');
     const cardFoil = document.getElementById('cardFoil');
     const btnPermission = document.getElementById('btn-permission');
+    
+    let isFlipped = false;
+
+    // Hàm cập nhật góc nghiêng và vệt sáng phản quang (chỉ chạy khi CHƯA lật)
     function updateCardEffects(xDeg, yDeg) {
+      if (isFlipped) return; // Nếu đã lật mặt sau thì không tính toán hiệu ứng mặt trước nữa
+
       cardContainer.style.transform = `rotateX(${xDeg}deg) rotateY(${yDeg}deg)`;
-      cardFoil.style.setProperty('--foil-x', `${50 + (yDeg * 2.2)}%`);
-      cardFoil.style.setProperty('--foil-y', `${50 - (xDeg * 2.2)}%`);
-      cardFoil.style.setProperty('--foil-angle', `${115 + (yDeg * 2)}deg`);
+      
+      const foilX = 50 + (yDeg * 2.5);
+      const foilY = 50 - (xDeg * 2.5);
+      const foilAngle = 115 + (yDeg * 2);
+
+      cardFoil.style.setProperty('--foil-x', `${foilX}%`);
+      cardFoil.style.setProperty('--foil-y', `${foilY}%`);
+      cardFoil.style.setProperty('--foil-angle', `${foilAngle}deg`);
     }
+
+    // --- SỰ KIỆN CLICK ĐỂ LẬT THẺ ---
+    cardContainer.addEventListener('click', () => {
+      isFlipped = !isFlipped;
+      if (isFlipped) {
+        cardContainer.classList.add('flipped');
+      } else {
+        cardContainer.classList.remove('flipped');
+        cardContainer.style.transform = `rotateX(0deg) rotateY(0deg)`; // Trả về vị trí thẳng khi lật lại mặt trước
+      }
+    });
+
+    // --- DI CHUỘT TRÊN MÁY TÍNH (PC) ---
     document.addEventListener('mousemove', (e) => {
-      if (window.innerWidth > 768) {
-        updateCardEffects(-(window.innerHeight / 2 - e.pageY) / 12, (window.innerWidth / 2 - e.pageX) / 12);
+      if (window.innerWidth > 768 && !isFlipped) {
+        const xAxis = (window.innerWidth / 2 - e.pageX) / 10;
+        const yAxis = (window.innerHeight / 2 - e.pageY) / 10;
+        updateCardEffects(-yAxis, xAxis);
       }
     });
+
     document.addEventListener('mouseleave', () => {
-      if (window.innerWidth > 768) {
+      if (window.innerWidth > 768 && !isFlipped) {
         cardContainer.style.transform = `rotateY(0deg) rotateX(0deg)`;
-        cardFoil.style.setProperty('--foil-x', '50%'); cardFoil.style.setProperty('--foil-y', '50%'); cardFoil.style.setProperty('--foil-angle', '115deg');
+        cardFoil.style.setProperty('--foil-x', '50%');
+        cardFoil.style.setProperty('--foil-y', '50%');
       }
     });
+
+    // --- NGHIÊNG MÁY TRÊN ĐIỆN THOẠI (MOBILE) ---
     function handleOrientation(event) {
-      updateCardEffects(-Math.min(Math.max(event.beta - 45, -25), 25), Math.min(Math.max(event.gamma, -25), 25));
+      if (isFlipped) return;
+      let beta = event.beta;   
+      let gamma = event.gamma; 
+
+      let tiltX = Math.min(Math.max(beta - 45, -22), 22); 
+      let tiltY = Math.min(Math.max(gamma, -22), 22);
+
+      updateCardEffects(-tiltX, tiltY);
     }
+
     function requestGyroPermission() {
       if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
         DeviceOrientationEvent.requestPermission().then(state => {
-          if (state === 'granted') { window.addEventListener('deviceorientation', handleOrientation); btnPermission.style.display = 'none'; }
+          if (state === 'granted') { 
+            window.addEventListener('deviceorientation', handleOrientation); 
+            btnPermission.style.display = 'none'; 
+          }
         }).catch(console.error);
-      } else { window.addEventListener('deviceorientation', handleOrientation); btnPermission.style.display = 'none'; }
+      } else { 
+        window.addEventListener('deviceorientation', handleOrientation); 
+        btnPermission.style.display = 'none'; 
+      }
     }
     btnPermission.addEventListener('click', requestGyroPermission);
   </script>
